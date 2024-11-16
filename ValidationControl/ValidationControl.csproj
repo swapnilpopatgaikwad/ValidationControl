@@ -30,6 +30,8 @@
 		<None Include="**\iOS\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\**\*.Windows.cs" />
 		<None Include="**\**\*.Windows.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+		<Compile Remove="**\Windows\**\*.cs" />
+		<None Include="**\Windows\**\*..cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 	</ItemGroup>
 
 	<!-- Android platform-specific files -->
@@ -45,20 +47,20 @@
 	</ItemGroup>
 
 	<!-- Windows platform-specific files -->
-	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.19041.0'">
-		<Compile Include="**\**\*.Windows.cs" />
-		<Compile Include="**\Windows\**\*.cs" />
-		<Compile Include="Platforms\Windows\**\*.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Remove="obj\**" />
-	</ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.19041.0'">
+    <Compile Include="**\**\*.Windows.cs" />
+    <Compile Include="**\Windows\**\*.cs" />
+  </ItemGroup>
 
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Folder Include="Handler\" />
 	</ItemGroup>
 
 </Project>

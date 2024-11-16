@@ -1,10 +1,12 @@
-﻿using Microsoft.Maui.Controls.Shapes;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.Maui.Controls.Platform;
+using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Handlers;
 using ValidationControl.Images;
 
 namespace ValidationControl.Controls
 {
-    [ContentProperty(nameof(Validations))]
+	[ContentProperty(nameof(Validations))]
     public partial class MEntry : Grid
     {
         protected readonly Entry _entry;
@@ -53,7 +55,8 @@ namespace ValidationControl.Controls
         public static readonly BindableProperty ErrorFontSizeProperty = BindableProperty.Create(
             nameof(ErrorFontSize), typeof(double), typeof(MEntry), 14.0);
 
-        public double ErrorFontSize
+		[System.ComponentModel.TypeConverter(typeof(FontSizeConverter))]
+		public double ErrorFontSize
         {
             get => (double)GetValue(ErrorFontSizeProperty);
             set => SetValue(ErrorFontSizeProperty, value);
@@ -203,7 +206,10 @@ namespace ValidationControl.Controls
             _entry.SetBinding(Entry.TextColorProperty, new Binding(nameof(EntryTextColor), source: this));
             _entry.SetBinding(Entry.FontSizeProperty, new Binding(nameof(EntryFontSize), source: this));
 
-            _content = new Grid
+			// Subscribe to HandlerChanged to update underline
+			_entry.HandlerChanged += OnEntryHandlerChanged;
+
+			_content = new Grid
             {
                 ColumnDefinitions = new ColumnDefinitionCollection
                 {
@@ -220,7 +226,6 @@ namespace ValidationControl.Controls
             {
                 StrokeShape = roundRectangle,
                 Content = _content,
-                StrokeThickness = 1 // Set to 1 or 2 when error occurs
             };
 
             _border.SetBinding(Border.StrokeProperty, new Binding(nameof(Stroke), source: this));
@@ -240,14 +245,73 @@ namespace ValidationControl.Controls
             labelValidation.Value.SetBinding(Label.FontSizeProperty, new Binding(nameof(ErrorFontSize), source: this));
         }
 
+		#region Events
 
-        #region Events
-        private static void OnTextChanged(BindableObject bindable, object oldValue, object newValue)
+		protected override void OnHandlerChanging(HandlerChangingEventArgs args)
+		{
+			base.OnHandlerChanging(args);
+
+			if (args.OldHandler != null)
+			{
+				// Unsubscribe from events
+				_entry.HandlerChanged -= OnEntryHandlerChanged;
+			}
+		}
+
+		private static void OnTextChanged(BindableObject bindable, object oldValue, object newValue)
         {
             var control = (MEntry)bindable;
             control.CheckAndShowValidations();
         }
 
-        #endregion
-    }
+		private void OnEntryHandlerChanged(object? sender, EventArgs e)
+		{
+			if (_entry.Handler is EntryHandler handler)
+			{
+				UpdateUnderline(handler);
+			}
+		}
+
+		protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			base.OnPropertyChanged(propertyName);
+
+			if (propertyName == nameof(NoUnderline))
+			{
+				if (_entry.Handler is EntryHandler handler)
+				{
+					UpdateUnderline(handler);
+				}
+			}
+		}
+
+		private void UpdateUnderline(EntryHandler handler)
+		{
+			if (Handler == null)
+				return;
+
+			bool noUnderline = NoUnderline;
+
+#if ANDROID
+			if (noUnderline)
+			{
+				handler.PlatformView.SetBackground(null); // Removes underline
+			}
+			else
+			{
+				handler.PlatformView.SetBackgroundResource(Resource.Drawable.abc_edit_text_material); // Default underline
+			}
+#elif IOS || MACCATALYST
+        handler.PlatformView.BorderStyle = noUnderline
+            ? UIKit.UITextBorderStyle.None
+            : UIKit.UITextBorderStyle.RoundedRect; // Default border
+#elif WINDOWS
+        handler.PlatformView.BorderThickness = noUnderline
+            ? new Microsoft.UI.Xaml.Thickness(0)
+            : new Microsoft.UI.Xaml.Thickness(1); // Default thickness
+#endif
+		}
+
+		#endregion
+	}
 }

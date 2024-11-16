@@ -13,10 +13,10 @@
 
         protected override string DefaultMessage => "Value must contain specified substring";
 
-        public override bool Validate(object value)
-        {
-            return value is string stringValue && stringValue.Contains(Substring);
-        }
-    }
+		public override bool Validate(object value)
+		{
+			return value is string stringValue && stringValue.Contains(Substring, StringComparison.OrdinalIgnoreCase);
+		}
+	}
 
 }

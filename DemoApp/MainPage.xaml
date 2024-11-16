@@ -6,27 +6,59 @@
              xmlns:validation="clr-namespace:ValidationControl.Validation;assembly=ValidationControl"
              x:Class="DemoApp.MainPage">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25">
-            <vControl:MEntry ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
-                             ErrorIconHeight="20"
-                             ErrorIconWidth="20"
-                             ErrorTextColor="Red"
-                             ErrorFontSize="16"
-                             CornerRadius="8">
-                <vControl:MEntry.Validations>
-                    <validation:RequiredValidation Message="Required String" />
-                </vControl:MEntry.Validations>
-            </vControl:MEntry>
-            <Button Text="Submit" ToolTipProperties.Text="text"/>
-            <Image Source="{x:Static resources:ImageCollection.ErrorIcon}"
-                   HeightRequest="24"
-                   WidthRequest="24"
-                   ToolTipProperties.Text="test" />
+  <ScrollView>
+    <VerticalStackLayout Padding="30,0"
+                         Spacing="25">
+      <vControl:MEntry ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                       ErrorIconHeight="20"
+                       ErrorIconWidth="20"
+                       ErrorTextColor="Red"
+                       ErrorFontSize="16"
+                       NoUnderline="True"
+                       CornerRadius="8">
+        <vControl:MEntry.Validations>
+          <validation:RequiredValidation Message="Required String" />
+        </vControl:MEntry.Validations>
+      </vControl:MEntry>
+      <vControl:MPicker ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                        ErrorIconHeight="20"
+                        ErrorIconWidth="20"
+                        ErrorTextColor="Red"
+                        ErrorFontSize="16"
+                        NoUnderline="True"
+                        CornerRadius="8">
+        <vControl:MPicker.Validations>
+          <validation:RequiredValidation Message="Required value" />
+        </vControl:MPicker.Validations>
+      </vControl:MPicker>
+      <vControl:MDatePicker ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                            ErrorIconHeight="20"
+                            ErrorIconWidth="20"
+                            ErrorTextColor="Red"
+                            ErrorFontSize="16"
+                            NoUnderline="True"
+                            CornerRadius="8">
+        <vControl:MDatePicker.Validations>
+          <validation:RequiredValidation Message="Required date" />
+        </vControl:MDatePicker.Validations>
+      </vControl:MDatePicker>
+      <vControl:MTimePicker ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                            ErrorIconHeight="20"
+                            ErrorIconWidth="20"
+                            ErrorTextColor="Red"
+                            ErrorFontSize="16"
+                            NoUnderline="True"
+                            CornerRadius="8">
+        <vControl:MTimePicker.Validations>
+          <validation:RequiredValidation Message="Required time" />
+        </vControl:MTimePicker.Validations>
+      </vControl:MTimePicker>
+      
+      
+      <Button Text="Submit"
+              ToolTipProperties.Text="text" />
 
-        </VerticalStackLayout>
-    </ScrollView>
+    </VerticalStackLayout>
+  </ScrollView>
 
 </ContentPage>
