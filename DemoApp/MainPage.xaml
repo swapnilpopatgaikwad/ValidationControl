@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:resources="clr-namespace:ValidationControl.Images;assembly=ValidationControl"
+             xmlns:vControl="clr-namespace:ValidationControl.Controls;assembly=ValidationControl"
+             xmlns:validation="clr-namespace:ValidationControl.Validation;assembly=ValidationControl"
+             x:Class="DemoApp.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+            <vControl:MEntry ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                             ErrorIconHeight="20"
+                             ErrorIconWidth="20"
+                             ErrorTextColor="Red"
+                             ErrorFontSize="16"
+                             CornerRadius="8">
+                <vControl:MEntry.Validations>
+                    <validation:RequiredValidation Message="Required String" />
+                </vControl:MEntry.Validations>
+            </vControl:MEntry>
+            <Button Text="Submit" ToolTipProperties.Text="text"/>
+            <Image Source="{x:Static resources:ImageCollection.ErrorIcon}"
+                   HeightRequest="24"
+                   WidthRequest="24"
+                   ToolTipProperties.Text="test" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
