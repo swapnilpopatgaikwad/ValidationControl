@@ -44,8 +44,13 @@ namespace ValidationControl.Controls
 			}
 			else
 			{
-				var message = string.Join('\n', results.Where(x => !x.isValid).Select(s => s.message));
-				labelValidation.Value.Text = message;
+				var message = results?.FirstOrDefault(x => !x.isValid).message ?? string.Empty;
+
+				// Set the text of the label to the first validation message
+				if ((!string.IsNullOrEmpty(message)))
+				{
+					labelValidation.Value.Text = message;
+				}
 
 				if (isStateChanged)
 				{

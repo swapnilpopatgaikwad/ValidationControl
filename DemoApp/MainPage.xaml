@@ -4,59 +4,97 @@
              xmlns:resources="clr-namespace:ValidationControl.Images;assembly=ValidationControl"
              xmlns:vControl="clr-namespace:ValidationControl.Controls;assembly=ValidationControl"
              xmlns:validation="clr-namespace:ValidationControl.Validation;assembly=ValidationControl"
+             xmlns:vm="clr-namespace:DemoApp.ViewModels"
+             x:DataType="vm:MainPageViewModel"
              x:Class="DemoApp.MainPage">
+
+  <ContentPage.BindingContext>
+    <vm:MainPageViewModel />
+  </ContentPage.BindingContext>
 
   <ScrollView>
     <VerticalStackLayout Padding="30,0"
                          Spacing="25">
-      <vControl:MEntry ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
-                       ErrorIconHeight="20"
-                       ErrorIconWidth="20"
-                       ErrorTextColor="Red"
-                       ErrorFontSize="16"
-                       NoUnderline="True"
-                       CornerRadius="8">
-        <vControl:MEntry.Validations>
-          <validation:RequiredValidation Message="Required String" />
-        </vControl:MEntry.Validations>
-      </vControl:MEntry>
-      <vControl:MPicker ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
-                        ErrorIconHeight="20"
-                        ErrorIconWidth="20"
-                        ErrorTextColor="Red"
-                        ErrorFontSize="16"
-                        NoUnderline="True"
-                        CornerRadius="8">
-        <vControl:MPicker.Validations>
-          <validation:RequiredValidation Message="Required value" />
-        </vControl:MPicker.Validations>
-      </vControl:MPicker>
-      <vControl:MDatePicker ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
-                            ErrorIconHeight="20"
-                            ErrorIconWidth="20"
-                            ErrorTextColor="Red"
-                            ErrorFontSize="16"
-                            NoUnderline="True"
-                            CornerRadius="8">
-        <vControl:MDatePicker.Validations>
-          <validation:RequiredValidation Message="Required date" />
-        </vControl:MDatePicker.Validations>
-      </vControl:MDatePicker>
-      <vControl:MTimePicker ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
-                            ErrorIconHeight="20"
-                            ErrorIconWidth="20"
-                            ErrorTextColor="Red"
-                            ErrorFontSize="16"
-                            NoUnderline="True"
-                            CornerRadius="8">
-        <vControl:MTimePicker.Validations>
-          <validation:RequiredValidation Message="Required time" />
-        </vControl:MTimePicker.Validations>
-      </vControl:MTimePicker>
-      
-      
+      <vControl:FormView x:Name="formView">
+        <vControl:MEntry ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                         ErrorIconHeight="20"
+                         ErrorIconWidth="20"
+                         ErrorTextColor="Red"
+                         ErrorFontSize="16"
+                         Placeholder="Name"
+                         NoUnderline="True"
+                         CornerRadius="8">
+          <vControl:MEntry.Validations>
+            <validation:RequiredValidation Message="Required String" />
+          </vControl:MEntry.Validations>
+        </vControl:MEntry>
+        <vControl:MEntry x:Name="password"
+                         ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                         ErrorIconHeight="20"
+                         ErrorIconWidth="20"
+                         ErrorTextColor="Red"
+                         ErrorFontSize="16"
+                         NoUnderline="True"
+                         CornerRadius="8"
+                         Placeholder="Password"
+                         Text="{Binding Password, Mode=TwoWay}">
+          <vControl:MEntry.Validations>
+            <validation:RequiredValidation Message="Required String" />
+          </vControl:MEntry.Validations>
+        </vControl:MEntry>
+        <vControl:MEntry ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                         ErrorIconHeight="20"
+                         ErrorIconWidth="20"
+                         ErrorTextColor="Red"
+                         ErrorFontSize="16"
+                         NoUnderline="True"
+                         CornerRadius="8"
+                         Placeholder="Confirm Password"
+                         Text="{Binding ConfirmPassword}">
+          <vControl:MEntry.Validations>
+            <validation:MatchValidation TargetEntry="{x:Reference password}"
+                                        Message="Passwords must match." />
+          </vControl:MEntry.Validations>
+        </vControl:MEntry>
+        <vControl:MPicker ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                          ErrorIconHeight="20"
+                          ErrorIconWidth="20"
+                          ErrorTextColor="Red"
+                          ErrorFontSize="16"
+                          NoUnderline="True"
+                          CornerRadius="8">
+          <vControl:MPicker.Validations>
+            <validation:RequiredValidation Message="Required value" />
+          </vControl:MPicker.Validations>
+        </vControl:MPicker>
+        <vControl:MDatePicker ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                              ErrorIconHeight="20"
+                              ErrorIconWidth="20"
+                              ErrorTextColor="Red"
+                              ErrorFontSize="16"
+                              DateTextColor="Black"
+                              CornerRadius="8">
+          <vControl:MDatePicker.Validations>
+            <validation:RequiredValidation Message="Required date" />
+          </vControl:MDatePicker.Validations>
+        </vControl:MDatePicker>
+        <vControl:MTimePicker ErrorIconSource="{x:Static resources:ImageCollection.ErrorIcon}"
+                              ErrorIconHeight="20"
+                              ErrorIconWidth="20"
+                              ErrorTextColor="Red"
+                              ErrorFontSize="16"
+                              TimeTextColor="Black"
+                              CornerRadius="8">
+          <vControl:MTimePicker.Validations>
+            <validation:RequiredValidation Message="Required time" />
+          </vControl:MTimePicker.Validations>
+        </vControl:MTimePicker>
+      </vControl:FormView>
+
       <Button Text="Submit"
-              ToolTipProperties.Text="text" />
+              ToolTipProperties.Text="text"
+              Command="{Binding SubmitCommand}"
+              CommandParameter="{Binding Source={x:Reference formView}}" />
 
     </VerticalStackLayout>
   </ScrollView>

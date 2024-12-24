@@ -1,7 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.Maui.Controls.Platform;
+﻿using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
-using Microsoft.Maui.Handlers;
+using ValidationControl.CustomControl;
 using ValidationControl.Images;
 
 namespace ValidationControl.Controls
@@ -10,7 +9,7 @@ namespace ValidationControl.Controls
 	[ContentProperty(nameof(Validations))]
 	public partial class MTimePicker : Grid
 	{
-		protected readonly TimePicker _timePicker;
+		protected readonly CMTimePicker _timePicker;
 		protected readonly Border _border;
 		protected readonly HorizontalStackLayout errorIconsContainer = new();
 		protected Grid _content;
@@ -100,12 +99,72 @@ namespace ValidationControl.Controls
 			nameof(NoUnderline),
 			typeof(bool),
 			typeof(MTimePicker),
-			false);
+			true);
 
 		public bool NoUnderline
 		{
 			get => (bool)GetValue(NoUnderlineProperty);
 			set => SetValue(NoUnderlineProperty, value);
+		}
+
+		public static readonly BindableProperty PlaceHolderProperty =
+			BindableProperty.Create(nameof(PlaceHolder), typeof(string), typeof(CMTimePicker), "Select time");
+
+		public string PlaceHolder
+		{
+			get { return (string)GetValue(PlaceHolderProperty); }
+			set
+			{
+				SetValue(PlaceHolderProperty, value);
+			}
+		}
+
+		public static readonly BindableProperty PlaceHolderColorProperty =
+			BindableProperty.Create(nameof(PlaceHolderColor), typeof(Color), typeof(CMTimePicker), Colors.Gray);
+
+		public Color PlaceHolderColor
+		{
+			get { return (Color)GetValue(PlaceHolderColorProperty); }
+			set
+			{
+				SetValue(PlaceHolderColorProperty, value);
+			}
+		}
+
+		public static readonly BindableProperty SelectCommandProperty =
+			BindableProperty.Create(nameof(SelectCommand), typeof(ICommand), typeof(CMTimePicker), null);
+
+		public ICommand SelectCommand
+		{
+			get { return (ICommand)GetValue(SelectCommandProperty); }
+			set { SetValue(SelectCommandProperty, value); }
+		}
+
+		public static readonly BindableProperty CommandParameterProperty =
+			BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(CMTimePicker), null);
+
+		public object CommandParameter
+		{
+			get { return GetValue(CommandParameterProperty); }
+			set { SetValue(CommandParameterProperty, value); }
+		}
+
+		public static readonly BindableProperty NullableTimeProperty =
+		BindableProperty.Create(nameof(NullableTime), typeof(TimeSpan?), typeof(CMTimePicker), null, defaultBindingMode: BindingMode.TwoWay);
+
+		public TimeSpan? NullableTime
+		{
+			get { return (TimeSpan?)GetValue(NullableTimeProperty); }
+			set { SetValue(NullableTimeProperty, value); }
+		}
+
+		public static readonly BindableProperty Is24HourViewProperty =
+		BindableProperty.Create(nameof(Is24HourView), typeof(bool), typeof(CMTimePicker), false, defaultBindingMode: BindingMode.TwoWay);
+
+		public bool Is24HourView
+		{
+			get { return (bool)GetValue(Is24HourViewProperty); }
+			set { SetValue(Is24HourViewProperty, value); }
 		}
 
 		#endregion
@@ -149,18 +208,24 @@ namespace ValidationControl.Controls
 				new RowDefinition { Height = GridLength.Auto }
 			};
 
-			_timePicker = new TimePicker
+			_timePicker = new CMTimePicker
 			{
 				HorizontalOptions = LayoutOptions.Fill,
-				VerticalOptions = LayoutOptions.Center
+				VerticalOptions = LayoutOptions.Center,
+				Margin = new Thickness(5,0,0,0)
+				
 			};
 
-			_timePicker.SetBinding(TimePicker.TimeProperty, new Binding(nameof(Time), source: this));
-			_timePicker.SetBinding(TimePicker.TextColorProperty, new Binding(nameof(TimeTextColor), source: this));
-			_timePicker.SetBinding(TimePicker.FontSizeProperty, new Binding(nameof(TimeFontSize), source: this));
-
-			// Subscribe to HandlerChanged to update underline
-			_timePicker.HandlerChanged += OnTimePickerHandlerChanged;
+			_timePicker.SetBinding(CMTimePicker.TimeProperty, new Binding(nameof(Time), source: this));
+			_timePicker.SetBinding(CMTimePicker.TextColorProperty, new Binding(nameof(TimeTextColor), source: this));
+			_timePicker.SetBinding(CMTimePicker.FontSizeProperty, new Binding(nameof(TimeFontSize), source: this));
+			_timePicker.SetBinding(CMTimePicker.PlaceHolderProperty, new Binding(nameof(PlaceHolder), source: this));
+			_timePicker.SetBinding(CMTimePicker.PlaceHolderColorProperty, new Binding(nameof(PlaceHolderColor), source: this));
+			_timePicker.SetBinding(CMTimePicker.SelectCommandProperty, new Binding(nameof(SelectCommand), source: this));
+			_timePicker.SetBinding(CMTimePicker.CommandParameterProperty, new Binding(nameof(CommandParameter), source: this));
+			_timePicker.SetBinding(CMTimePicker.NullableTimeProperty, new Binding(nameof(NullableTime), source: this));
+			_timePicker.SetBinding(CMTimePicker.Is24HourViewProperty, new Binding(nameof(Is24HourView), source: this));
+			_timePicker.SetBinding(CMTimePicker.NoUnderlineProperty, new Binding(nameof(NoUnderline), source: this));
 
 			_content = new Grid
 			{
@@ -196,77 +261,6 @@ namespace ValidationControl.Controls
 		}
 
 		#region Events
-
-		protected override void OnHandlerChanging(HandlerChangingEventArgs args)
-		{
-			base.OnHandlerChanging(args);
-
-			if (args.OldHandler != null)
-			{
-				// Unsubscribe from events
-				_timePicker.HandlerChanged -= OnTimePickerHandlerChanged;
-			}
-		}
-
-		private void OnTimePickerHandlerChanged(object? sender, EventArgs e)
-		{
-			if (_timePicker.Handler is TimePickerHandler handler)
-			{
-				UpdateUnderline(handler);
-			}
-		}
-
-		protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			base.OnPropertyChanged(propertyName);
-
-			if (propertyName == nameof(NoUnderline))
-			{
-				if (_timePicker.Handler is TimePickerHandler handler)
-				{
-					UpdateUnderline(handler);
-				}
-			}
-		}
-
-		private void UpdateUnderline(TimePickerHandler handler)
-		{
-			if (handler == null || handler.PlatformView == null)
-				return;
-
-			bool noUnderline = NoUnderline;
-
-#if ANDROID
-			if (noUnderline)
-			{
-				handler.PlatformView.SetBackground(null); // Removes underline
-			}
-			else
-			{
-				handler.PlatformView.SetBackgroundResource(Resource.Drawable.abc_edit_text_material); // Ensure you have a valid resource for underline
-			}
-#elif IOS || MACCATALYST
-			if (handler.PlatformView is UIKit.UIView platformView)
-			{
-				if (platformView.Superview != null)
-				{
-					platformView.Superview.Layer.BorderWidth = 0; // Remove underline/border
-					platformView.Superview.Layer.BorderColor = UIKit.UIColor.Clear.CGColor;
-				}
-				else
-				{
-					// If needed, you can also target platformView.Layer directly if Superview does not work.
-					platformView.Layer.BorderWidth = 0;
-					platformView.Layer.BorderColor = UIKit.UIColor.Clear.CGColor;
-				}
-			}
-#elif WINDOWS
-			if (handler.PlatformView is Microsoft.UI.Xaml.Controls.TimePicker platformView)
-			{
-				platformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0); // Removes the underline
-			}
-#endif
-		}
 
 		#endregion
 	}

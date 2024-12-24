@@ -1,23 +1,27 @@
-﻿using ValidationControl.Interface;
+﻿using ValidationControl.Controls;
 
 namespace ValidationControl.Validation
 {
-    public class MatchValidation : BaseValidation
-    {
-        public static readonly BindableProperty MatchValueProperty =
-            BindableProperty.Create(nameof(MatchValue), typeof(string), typeof(MatchValidation), null);
+	public class MatchValidation<T> : BaseValidation where T : BindableObject
+	{
+		public T TargetEntry { get; set; }  // T can be either MEntry or Entry
 
-        public string MatchValue
-        {
-            get => (string)GetValue(MatchValueProperty);
-            set => SetValue(MatchValueProperty, value);
-        }
+		protected override string DefaultMessage => "Values do not match";
 
-        protected override string DefaultMessage => "Values do not match";
+		public override bool Validate(object value)
+		{
+			if (value is not string confirmPassword)
+				return false;
 
-        public override bool Validate(object value)
-        {
-            return value is string stringValue && stringValue == MatchValue;
-        }
-    }
+			if (TargetEntry is MEntry mEntry)
+			{
+				return confirmPassword == mEntry.Text;  // For MEntry
+			}
+			else if (TargetEntry is Entry entry)
+			{
+				return confirmPassword == entry.Text;  // For normal Entry
+			}
+			return false;
+		}
+	}
 }

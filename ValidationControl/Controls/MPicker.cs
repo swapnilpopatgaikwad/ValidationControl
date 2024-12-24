@@ -3,9 +3,9 @@ using System.Runtime.CompilerServices;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Handlers;
 using ValidationControl.Images;
-using Microsoft.Maui.Controls.Platform;
 
 #if ANDROID
+using Microsoft.Maui.Controls.Platform;
 using Microsoft.Maui.Controls.Compatibility.Platform.Android;
 #elif IOS || MACCATALYST
 using UIKit;
@@ -20,7 +20,60 @@ namespace ValidationControl.Controls
 		protected readonly Picker _picker;
 		protected readonly Border _border;
 		protected readonly HorizontalStackLayout errorIconsContainer = new();
+
+		protected readonly HorizontalStackLayout clearIconContainer = new();
+		protected Lazy<Image> clearIcon = new Lazy<Image>(() => new Image
+		{
+			VerticalOptions = LayoutOptions.Center,
+			HorizontalOptions = LayoutOptions.End,
+			Margin = new Thickness(0, 0, 5, 0),
+		});
+
 		protected Grid _content;
+
+		#region Clear Properties
+
+		public static readonly BindableProperty AllowClearProperty =
+		BindableProperty.Create(
+			nameof(AllowClear),
+			typeof(bool),
+			typeof(MPicker),
+			false);
+
+		public bool AllowClear
+		{
+			get => (bool)GetValue(AllowClearProperty);
+			set => SetValue(AllowClearProperty, value);
+		}
+
+		public static readonly BindableProperty ClearIconHeightProperty = BindableProperty.Create(
+			nameof(ClearIconHeight), typeof(double), typeof(MPicker), 24.0);
+
+		public double ClearIconHeight
+		{
+			get => (double)GetValue(ClearIconHeightProperty);
+			set => SetValue(ClearIconHeightProperty, value);
+		}
+
+		public static readonly BindableProperty ClearIconWidthProperty = BindableProperty.Create(
+			nameof(ClearIconWidth), typeof(double), typeof(MPicker), 24.0);
+
+		public double ClearIconWidth
+		{
+			get => (double)GetValue(ClearIconWidthProperty);
+			set => SetValue(ClearIconWidthProperty, value);
+		}
+
+		public static readonly BindableProperty ClearIconSourceProperty = BindableProperty.Create(
+			nameof(ClearIconSource), typeof(ImageSource), typeof(MPicker), ImageCollection.ClearIcon);
+
+		public ImageSource ClearIconSource
+		{
+			get => (ImageSource)GetValue(ClearIconSourceProperty);
+			set => SetValue(ClearIconSourceProperty, value);
+		}
+
+		#endregion
 
 		#region Error Alert Properties
 
@@ -75,7 +128,7 @@ namespace ValidationControl.Controls
 		#region Picker Properties
 
 		public static readonly BindableProperty SelectedItemProperty = BindableProperty.Create(
-			nameof(SelectedItem), typeof(object), typeof(MPicker), default(object), BindingMode.TwoWay);
+			nameof(SelectedItem), typeof(object), typeof(MPicker), default(object), BindingMode.TwoWay, propertyChanged: OnPickerSelecteChanged);
 
 		public object SelectedItem
 		{
@@ -124,6 +177,24 @@ namespace ValidationControl.Controls
 			set => SetValue(NoUnderlineProperty, value);
 		}
 
+		public static readonly BindableProperty TitleColorProperty = BindableProperty.Create(
+			nameof(TitleColor), typeof(Color), typeof(MPicker), Colors.Gray);
+
+		public Color TitleColor
+		{
+			get => (Color)GetValue(TitleColorProperty);
+			set => SetValue(TitleColorProperty, value);
+		}
+
+		public static readonly BindableProperty TitleProperty = BindableProperty.Create(
+			nameof(Title), typeof(string), typeof(MPicker), "Select Option");
+
+		public string Title
+		{
+			get => (string)GetValue(TitleProperty);
+			set => SetValue(TitleProperty, value);
+		}
+
 		#endregion
 
 		#region Border Properties
@@ -168,12 +239,15 @@ namespace ValidationControl.Controls
 			_picker = new Picker
 			{
 				HorizontalOptions = LayoutOptions.Fill,
-				VerticalOptions = LayoutOptions.Center
+				VerticalOptions = LayoutOptions.Center,
+				Margin = new Thickness(5, 0, 0, 0)
 			};
 			_picker.SetBinding(Picker.SelectedItemProperty, new Binding(nameof(SelectedItem), source: this));
 			_picker.SetBinding(Picker.ItemsSourceProperty, new Binding(nameof(ItemsSource), source: this));
 			_picker.SetBinding(Picker.TextColorProperty, new Binding(nameof(PickerTextColor), source: this));
 			_picker.SetBinding(Picker.FontSizeProperty, new Binding(nameof(PickerFontSize), source: this));
+			_picker.SetBinding(Picker.TitleProperty, new Binding(nameof(Title), source: this));
+			_picker.SetBinding(Picker.TitleColorProperty, new Binding(nameof(TitleColor), source: this));
 
 			// Subscribe to HandlerChanged to update underline
 			_picker.HandlerChanged += OnPickerHandlerChanged;
@@ -203,6 +277,10 @@ namespace ValidationControl.Controls
 
 			this.Add(_border, 0, 0);
 
+			clearIcon.Value.SetBinding(Image.HeightRequestProperty, new Binding(nameof(ClearIconHeight), source: this));
+			clearIcon.Value.SetBinding(Image.WidthRequestProperty, new Binding(nameof(ClearIconWidth), source: this));
+			clearIcon.Value.SetBinding(Image.SourceProperty, new Binding(nameof(ClearIconSource), source: this));
+
 			iconValidation.Value.SetBinding(Image.HeightRequestProperty, new Binding(nameof(ErrorIconHeight), source: this));
 			iconValidation.Value.SetBinding(Image.WidthRequestProperty, new Binding(nameof(ErrorIconWidth), source: this));
 			iconValidation.Value.SetBinding(Image.SourceProperty, new Binding(nameof(ErrorIconSource), source: this));
@@ -231,6 +309,12 @@ namespace ValidationControl.Controls
 			{
 				UpdateUnderline(handler);
 			}
+		}
+
+		private static void OnPickerSelecteChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var control = (MPicker)bindable;
+			control.CheckAndShowValidations();
 		}
 
 		protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -265,15 +349,15 @@ namespace ValidationControl.Controls
 #elif IOS || MACCATALYST
 			if (noUnderline)
 			{
-				handler.PlatformView.BackgroundColor = UIKit.UIColor.Clear; // Removes the underline for iOS/Mac Catalyst
+				handler.PlatformView.BackgroundColor = UIColor.Clear; // Removes the underline for iOS/Mac Catalyst
 				handler.PlatformView.Layer.BorderWidth = 0; // No border
-				handler.PlatformView.BorderStyle = UIKit.UITextBorderStyle.None; // No border style
+				handler.PlatformView.BorderStyle = UITextBorderStyle.None; // No border style
 			}
 			else
 			{
-				handler.PlatformView.BackgroundColor = UIKit.UIColor.White; // Default background color
+				handler.PlatformView.BackgroundColor = UIColor.White; // Default background color
 				handler.PlatformView.Layer.BorderWidth = 1; // Default border width
-				handler.PlatformView.BorderStyle = UIKit.UITextBorderStyle.Line; // Default border style
+				handler.PlatformView.BorderStyle = UITextBorderStyle.Line; // Default border style
 			}
 #elif WINDOWS
 			if (handler.PlatformView is Microsoft.UI.Xaml.Controls.ComboBox platformView)

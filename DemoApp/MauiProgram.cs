@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using ValidationControl.Hosting;
+﻿using CommunityToolkit.Maui;
+using Microsoft.Extensions.Logging;
+using ValidationControl;
 
 namespace DemoApp
 {
@@ -10,15 +11,17 @@ namespace DemoApp
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
-                .UseValidationControl()
-                .ConfigureFonts(fonts =>
+				.UseMauiCommunityToolkit()
+				.ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+			builder.UseValidationControl();
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+			builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

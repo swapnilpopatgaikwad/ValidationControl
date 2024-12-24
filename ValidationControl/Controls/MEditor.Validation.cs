@@ -2,7 +2,7 @@
 
 namespace ValidationControl.Controls
 {
-	public partial class MPicker : IValidatable
+	public partial class MEditor : IValidatable
 	{
 		public List<IValidation> Validations { get; } = new();
 		public bool IsValid { get => ValidationResults().All(x => x.isValid); }
@@ -52,6 +52,7 @@ namespace ValidationControl.Controls
 					labelValidation.Value.Text = message;
 				}
 
+
 				if (isStateChanged)
 				{
 					errorIconsContainer.Add(iconValidation.Value);
@@ -98,7 +99,7 @@ namespace ValidationControl.Controls
 
 		protected virtual object GetValueForValidator()
 		{
-			return _picker.SelectedItem;
+			return _editor.Text;
 		}
 	}
 }

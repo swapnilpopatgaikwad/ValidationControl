@@ -2,8 +2,8 @@
 
 namespace ValidationControl.Interface
 {
-    public interface IValidatable
-    {
+    public interface IValidatable : INotifyPropertyChanged
+	{
         List<IValidation> Validations { get; }
 
         bool IsValid { get; }

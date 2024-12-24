@@ -1,66 +1,95 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
-		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
-		<UseMaui>true</UseMaui>
-		<SingleProject>true</SingleProject>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
+  <PropertyGroup>
+    <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+    <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+    <!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>SwapnilG.MAUI.ValidationControl</PackageId>
+    <Version>1.0.9</Version>
+    <Authors>Swapnil</Authors>
+    <Product>ValidationControl</Product>
+    <IncludeSymbols>false</IncludeSymbols>
+    <IncludeSource>false</IncludeSource>
 
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-	</PropertyGroup>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+    <Configurations>Debug;Release;NugetRelease</Configurations>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<!-- Remove platform-specific files from default compilation -->
-		<Compile Remove="**\**\*.Android.cs" />
-		<None Include="**\**\*.Android.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-		<Compile Remove="**\Android\**\*.cs" />
-		<None Include="**\Android\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-		<Compile Remove="**\**\*.iOS.cs" />
-		<None Include="**\**\*.iOS.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-		<Compile Remove="**\iOS\**\*.cs" />
-		<None Include="**\iOS\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-		<Compile Remove="**\**\*.Windows.cs" />
-		<None Include="**\**\*.Windows.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-		<Compile Remove="**\Windows\**\*.cs" />
-		<None Include="**\Windows\**\*..cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-	</ItemGroup>
+  <ItemGroup>
+    <!-- Remove platform-specific files from default compilation -->
+    <Compile Remove="**\**\*.Android.cs" />
+    <None Include="**\**\*.Android.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Compile Remove="**\Android\**\*.cs" />
+    <None Include="**\Android\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Compile Remove="**\**\*.iOS.cs" />
+    <None Include="**\**\*.iOS.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Compile Remove="**\iOS\**\*.cs" />
+    <None Include="**\iOS\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Compile Remove="**\**\*.Windows.cs" />
+    <None Include="**\**\*.Windows.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Compile Remove="**\Windows\**\*.cs" />
+    <None Include="**\Windows\**\*..cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Compile Remove="**\**\*.macos.cs" />
+    <None Include="**\**\*.macos.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <Compile Remove="**\macos\**\*.cs" />
+    <None Include="**\macos\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+  </ItemGroup>
 
-	<!-- Android platform-specific files -->
-	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
-		<Compile Include="**\**\*.Android.cs" />
-		<Compile Include="**\Android\**\*.cs" />
-	</ItemGroup>
+  <!-- Android platform-specific files -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
+    <Compile Include="**\**\*.Android.cs" />
+    <Compile Include="**\Android\**\*.cs" />
+  </ItemGroup>
 
-	<!-- iOS and MacCatalyst platform-specific files -->
-	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-ios' Or '$(TargetFramework)' == 'net8.0-maccatalyst'">
-		<Compile Include="**\**\*.iOS.cs" />
-		<Compile Include="**\iOS\**\*.cs" />
-	</ItemGroup>
+  <!-- iOS platform-specific files -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-ios'">
+    <Compile Include="**\**\*.iOS.cs" />
+    <Compile Include="**\iOS\**\*.cs" />
+  </ItemGroup>
 
-	<!-- Windows platform-specific files -->
+  <!-- MacCatalyst platform-specific files -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-maccatalyst'">
+    <Compile Include="**\**\*.macos.cs" />
+    <Compile Include="**\macos\**\*.cs" />
+  </ItemGroup>
+
+  <!-- Windows platform-specific files -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.19041.0'">
     <Compile Include="**\**\*.Windows.cs" />
     <Compile Include="**\Windows\**\*.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Extensions\CMDatePickerExtensions.Android.cs" />
+    <None Remove="Extensions\CMTimePickerExtensions.Android.cs" />
+    <None Remove="Handler\CMDatePickerHandler.Android.cs" />
+    <None Remove="Handler\CMTimePickerHandler.Android.cs" />
+  </ItemGroup>
 
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <!-- Include the compiled assemblies, but exclude source and symbols -->
+    <None Remove="src\**\*" />
+    <None Remove="**\*.pdb" />
+  </ItemGroup>
 
-
-	<ItemGroup>
-	  <Folder Include="Handler\" />
-	</ItemGroup>
+  <Target Name="CopyFiles" AfterTargets="Build">
+    <!-- Ensure the output folder only contains .dll and .xml, excluding .pdb -->
+    <Copy SourceFiles="@(ReferenceCopyLocalPaths)" DestinationFolder="$(OutputPath)" />
+  </Target>
 
 </Project>

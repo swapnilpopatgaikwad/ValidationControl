@@ -2,6 +2,7 @@
 using Microsoft.Maui.Controls.Platform;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Handlers;
+using ValidationControl.Behaviors;
 using ValidationControl.Images;
 
 namespace ValidationControl.Controls
@@ -13,10 +14,11 @@ namespace ValidationControl.Controls
         protected readonly Border _border;
         protected readonly HorizontalStackLayout errorIconsContainer = new();
         protected Grid _content;
+		private readonly Image _passwordToggleIcon;
 
-        #region Error Alert Properties
+		#region Error Alert Properties
 
-        public static readonly BindableProperty ErrorIconHeightProperty = BindableProperty.Create(
+		public static readonly BindableProperty ErrorIconHeightProperty = BindableProperty.Create(
         nameof(ErrorIconHeight), typeof(double), typeof(MEntry), 24.0);
 
         public double ErrorIconHeight
@@ -150,11 +152,47 @@ namespace ValidationControl.Controls
             set => SetValue(NoUnderlineProperty, value);
         }
 
-        #endregion
+		public static readonly BindableProperty KeyboardTypeProperty =
+			BindableProperty.Create(nameof(KeyboardType), typeof(Keyboard), typeof(MEntry), Keyboard.Default);
 
-        #region Border Properties
+		public Keyboard KeyboardType
+		{
+			get => (Keyboard)GetValue(KeyboardTypeProperty);
+			set => SetValue(KeyboardTypeProperty, value);
+		}
 
-        public static readonly BindableProperty CornerRadiusProperty =
+		public static readonly BindableProperty IsPasswordProperty =
+			BindableProperty.Create(nameof(IsPassword), typeof(bool), typeof(MEntry), false, propertyChanged: OnIsPasswordChanged);
+
+		public bool IsPassword
+		{
+			get => (bool)GetValue(IsPasswordProperty);
+			set => SetValue(IsPasswordProperty, value);
+		}
+
+		public static readonly BindableProperty PasswordToggleIconProperty =
+			BindableProperty.Create(nameof(PasswordToggleIcon), typeof(ImageSource), typeof(MEntry), ImageCollection.ShowPasswordIcon);
+
+		public ImageSource PasswordToggleIcon
+		{
+			get => (ImageSource)GetValue(PasswordToggleIconProperty);
+			set => SetValue(PasswordToggleIconProperty, value);
+		}
+
+		public static readonly BindableProperty PasswordToggleIconColorProperty =
+			BindableProperty.Create(nameof(PasswordToggleIconColor), typeof(Color), typeof(MEntry), Colors.Black);
+
+		public Color PasswordToggleIconColor
+		{
+			get => (Color)GetValue(PasswordToggleIconColorProperty);
+			set => SetValue(PasswordToggleIconColorProperty, value);
+		}
+
+		#endregion
+
+		#region Border Properties
+
+		public static readonly BindableProperty CornerRadiusProperty =
             BindableProperty.Create(nameof(CornerRadius), typeof(CornerRadius), typeof(RoundRectangle), new CornerRadius());
 
         public CornerRadius CornerRadius
@@ -196,15 +234,15 @@ namespace ValidationControl.Controls
             {
                 HorizontalOptions = LayoutOptions.Fill,
                 VerticalOptions = LayoutOptions.Center,
-                PlaceholderColor = this.PlaceholderColor,
-                TextColor = this.EntryTextColor,
-                FontSize = this.EntryFontSize
+				Margin = new Thickness(5,0,0,0)
             };
             _entry.SetBinding(Entry.TextProperty, new Binding(nameof(Text), source: this));
             _entry.SetBinding(Entry.PlaceholderProperty, new Binding(nameof(Placeholder), source: this));
             _entry.SetBinding(Entry.PlaceholderColorProperty, new Binding(nameof(PlaceholderColor), source: this));
             _entry.SetBinding(Entry.TextColorProperty, new Binding(nameof(EntryTextColor), source: this));
             _entry.SetBinding(Entry.FontSizeProperty, new Binding(nameof(EntryFontSize), source: this));
+			_entry.SetBinding(Entry.KeyboardProperty, new Binding(nameof(KeyboardType), source: this));
+			_entry.SetBinding(Entry.IsPasswordProperty, new Binding(nameof(IsPassword), source: this));
 
 			// Subscribe to HandlerChanged to update underline
 			_entry.HandlerChanged += OnEntryHandlerChanged;
@@ -214,6 +252,7 @@ namespace ValidationControl.Controls
                 ColumnDefinitions = new ColumnDefinitionCollection
                 {
                     new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Auto },
                     new ColumnDefinition { Width = GridLength.Auto }
                 },
             };
@@ -243,7 +282,26 @@ namespace ValidationControl.Controls
             // Update error label properties
             labelValidation.Value.SetBinding(Label.TextColorProperty, new Binding(nameof(ErrorTextColor), source: this));
             labelValidation.Value.SetBinding(Label.FontSizeProperty, new Binding(nameof(ErrorFontSize), source: this));
-        }
+
+			// Initialize password toggle icon
+			_passwordToggleIcon = new Image
+			{
+				HorizontalOptions = LayoutOptions.End,
+				VerticalOptions = LayoutOptions.Center,
+				Margin = new Thickness(0, 0, 5, 0)
+			};
+			_passwordToggleIcon.SetBinding(Image.SourceProperty, new Binding(nameof(PasswordToggleIcon), source: this));
+			var behavior = new IconTintColorBehavior();
+			behavior.SetBinding(IconTintColorBehavior.TintColorProperty, new Binding(nameof(PasswordToggleIconColor), source: this));
+			_passwordToggleIcon.Behaviors.Add(behavior);
+			_passwordToggleIcon.GestureRecognizers.Add(new TapGestureRecognizer
+			{
+				Command = new Command(TogglePasswordVisibility)
+			});
+
+			_content.Add(_passwordToggleIcon, 1, 0);
+			UpdatePasswordToggleIconVisibility();
+		}
 
 		#region Events
 
@@ -310,6 +368,27 @@ namespace ValidationControl.Controls
             ? new Microsoft.UI.Xaml.Thickness(0)
             : new Microsoft.UI.Xaml.Thickness(1); // Default thickness
 #endif
+		}
+
+		private static void OnIsPasswordChanged(BindableObject bindable, object oldValue, object newValue)
+		{
+			var control = (MEntry)bindable;
+			control.UpdatePasswordToggleIconVisibility();
+		}
+
+		#endregion
+
+		#region Methods
+
+		private void TogglePasswordVisibility()
+		{
+			_entry.IsPassword = !_entry.IsPassword;
+			PasswordToggleIcon = _entry.IsPassword ? ImageCollection.ShowPasswordIcon : ImageCollection.HidePasswordIcon;
+		}
+
+		private void UpdatePasswordToggleIconVisibility()
+		{
+			_passwordToggleIcon.IsVisible = IsPassword;
 		}
 
 		#endregion

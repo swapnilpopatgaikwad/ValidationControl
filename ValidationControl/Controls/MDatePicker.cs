@@ -1,6 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Handlers;
+using ValidationControl.CustomControl;
 using ValidationControl.Images;
 
 namespace ValidationControl.Controls
@@ -8,7 +10,7 @@ namespace ValidationControl.Controls
 	[ContentProperty(nameof(Validations))]
 	public partial class MDatePicker : Grid
 	{
-		protected readonly DatePicker _datePicker;
+		protected readonly CMDatePicker _datePicker;
 		protected readonly Border _border;
 		protected readonly HorizontalStackLayout errorIconsContainer = new();
 		protected Grid _content;
@@ -116,12 +118,63 @@ namespace ValidationControl.Controls
 			nameof(NoUnderline),
 			typeof(bool),
 			typeof(MDatePicker),
-			false);
+			true);
 
 		public bool NoUnderline
 		{
 			get => (bool)GetValue(NoUnderlineProperty);
 			set => SetValue(NoUnderlineProperty, value);
+		}
+
+		public static readonly BindableProperty PlaceHolderProperty =
+			BindableProperty.Create(nameof(PlaceHolder), typeof(string), typeof(MDatePicker), "Select date");
+
+		public string PlaceHolder
+		{
+			get { return (string)GetValue(PlaceHolderProperty); }
+			set
+			{
+				SetValue(PlaceHolderProperty, value);
+			}
+		}
+
+		public static readonly BindableProperty PlaceHolderColorProperty =
+			BindableProperty.Create(nameof(PlaceHolderColor), typeof(Color), typeof(MDatePicker), Colors.Gray);
+
+		public Color PlaceHolderColor
+		{
+			get { return (Color)GetValue(PlaceHolderColorProperty); }
+			set
+			{
+				SetValue(PlaceHolderColorProperty, value);
+			}
+		}
+
+		public static readonly BindableProperty SelectCommandProperty =
+			BindableProperty.Create(nameof(SelectCommand), typeof(ICommand), typeof(MDatePicker), null);
+
+		public ICommand SelectCommand
+		{
+			get { return (ICommand)GetValue(SelectCommandProperty); }
+			set { SetValue(SelectCommandProperty, value); }
+		}
+
+		public static readonly BindableProperty CommandParameterProperty =
+			BindableProperty.Create(nameof(CommandParameter), typeof(object), typeof(MDatePicker), null);
+
+		public object CommandParameter
+		{
+			get { return GetValue(CommandParameterProperty); }
+			set { SetValue(CommandParameterProperty, value); }
+		}
+
+		public static readonly BindableProperty NullableDateProperty =
+		BindableProperty.Create(nameof(NullableDate), typeof(DateTime?), typeof(MDatePicker), null, defaultBindingMode: BindingMode.TwoWay);
+
+		public DateTime? NullableDate
+		{
+			get { return (DateTime?)GetValue(NullableDateProperty); }
+			set { SetValue(NullableDateProperty, value); }
 		}
 
 		#endregion
@@ -165,19 +218,22 @@ namespace ValidationControl.Controls
 				new RowDefinition { Height = GridLength.Auto }
 			};
 
-			_datePicker = new DatePicker
+			_datePicker = new CMDatePicker
 			{
 				HorizontalOptions = LayoutOptions.Fill,
 				VerticalOptions = LayoutOptions.Center,
+				Margin = new Thickness(5, 0, 0, 0)
 			};
-			_datePicker.SetBinding(DatePicker.DateProperty, new Binding(nameof(Date), source: this));
-			_datePicker.SetBinding(DatePicker.TextColorProperty, new Binding(nameof(DateTextColor), source: this));
-			_datePicker.SetBinding(DatePicker.FontSizeProperty, new Binding(nameof(DateFontSize), source: this));
-			_datePicker.SetBinding(DatePicker.MinimumDateProperty, new Binding(nameof(MinimumDate), source: this));
-			_datePicker.SetBinding(DatePicker.MaximumDateProperty, new Binding(nameof(MaximumDate), source: this));
-
-			// Subscribe to HandlerChanged to update underline
-			_datePicker.HandlerChanged += OnDatePickerHandlerChanged;
+			_datePicker.SetBinding(CMDatePicker.TextColorProperty, new Binding(nameof(DateTextColor), source: this));
+			_datePicker.SetBinding(CMDatePicker.FontSizeProperty, new Binding(nameof(DateFontSize), source: this));
+			_datePicker.SetBinding(CMDatePicker.MinimumDateProperty, new Binding(nameof(MinimumDate), source: this));
+			_datePicker.SetBinding(CMDatePicker.MaximumDateProperty, new Binding(nameof(MaximumDate), source: this));
+			_datePicker.SetBinding(CMDatePicker.NullableDateProperty, new Binding(nameof(NullableDate), source: this));
+			_datePicker.SetBinding(CMDatePicker.PlaceHolderProperty, new Binding(nameof(PlaceHolder), source: this));
+			_datePicker.SetBinding(CMDatePicker.PlaceHolderColorProperty, new Binding(nameof(PlaceHolderColor), source: this));
+			_datePicker.SetBinding(CMDatePicker.SelectCommandProperty, new Binding(nameof(SelectCommand), source: this));
+			_datePicker.SetBinding(CMDatePicker.CommandParameterProperty, new Binding(nameof(CommandParameter), source: this));
+			_datePicker.SetBinding(CMDatePicker.NoUnderlineProperty, new Binding(nameof(NoUnderline), source: this));
 
 			_content = new Grid
 			{
@@ -213,102 +269,6 @@ namespace ValidationControl.Controls
 		}
 
 		#region Events
-
-		protected override void OnHandlerChanging(HandlerChangingEventArgs args)
-		{
-			base.OnHandlerChanging(args);
-
-			if (args.OldHandler != null)
-			{
-				// Unsubscribe from events
-				_datePicker.HandlerChanged -= OnDatePickerHandlerChanged;
-			}
-		}
-
-		private void OnDatePickerHandlerChanged(object? sender, EventArgs e)
-		{
-			if (_datePicker.Handler is DatePickerHandler handler)
-			{
-				UpdateUnderline(handler);
-			}
-		}
-
-		protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			base.OnPropertyChanged(propertyName);
-
-			if (propertyName == nameof(NoUnderline))
-			{
-				if (_datePicker.Handler is DatePickerHandler handler)
-				{
-					UpdateUnderline(handler);
-				}
-			}
-		}
-
-		private void UpdateUnderline(DatePickerHandler handler)
-		{
-			if (handler == null || handler.PlatformView == null)
-				return;
-
-			bool noUnderline = NoUnderline; // Check if underline should be removed
-
-#if ANDROID
-			if (handler.PlatformView is Android.Widget.EditText platformView)
-			{
-				if (noUnderline)
-				{
-					platformView.Background = null; // Removes the underline
-				}
-				else
-				{
-				  // Apply default underline
-				}
-			}
-#elif IOS || MACCATALYST
-			if (handler.PlatformView is UIKit.UIView platformView)
-			{
-				if (noUnderline)
-				{
-					if (platformView.Superview != null)
-					{
-						platformView.Superview.Layer.BorderWidth = 0; // Removes the underline/border
-						platformView.Superview.Layer.BorderColor = UIKit.UIColor.Clear.CGColor;
-					}
-					else
-					{
-						platformView.Layer.BorderWidth = 0; // Removes the underline/border
-						platformView.Layer.BorderColor = UIKit.UIColor.Clear.CGColor;
-					}
-				}
-				else
-				{
-					if (platformView.Superview != null)
-					{
-						platformView.Superview.Layer.BorderWidth = 1; // Adds the underline/border
-						platformView.Superview.Layer.BorderColor = UIKit.UIColor.Black.CGColor; // Example color
-					}
-					else
-					{
-						platformView.Layer.BorderWidth = 1; // Adds the underline/border
-						platformView.Layer.BorderColor = UIKit.UIColor.Black.CGColor; // Example color
-					}
-				}
-			}
-#elif WINDOWS
-			if (handler.PlatformView is Microsoft.UI.Xaml.Controls.CalendarDatePicker platformView)
-			{
-				if (noUnderline)
-				{
-					platformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0); // Removes the underline
-				}
-				else
-				{
-					platformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(1); // Adds the underline
-				}
-			}
-#endif
-		}
 
 		#endregion
 	}
