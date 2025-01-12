@@ -10,7 +10,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>SwapnilG.MAUI.ValidationControl</PackageId>
-    <Version>1.0.9</Version>
+    <Version>1.0.3</Version>
     <Authors>Swapnil</Authors>
     <Product>ValidationControl</Product>
     <IncludeSymbols>false</IncludeSymbols>

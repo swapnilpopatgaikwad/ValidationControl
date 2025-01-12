@@ -2,25 +2,26 @@
 
 namespace ValidationControl.Validation
 {
-	public class MatchValidation<T> : BaseValidation where T : BindableObject
+	public class MatchValidation : MatchValidationBase<BindableObject>
 	{
-		public T TargetEntry { get; set; }  // T can be either MEntry or Entry
+	}
+
+	public abstract class MatchValidationBase<T> : BaseValidation where T : BindableObject
+	{
+		public T TargetEntry { get; set; }
 
 		protected override string DefaultMessage => "Values do not match";
 
 		public override bool Validate(object value)
 		{
-			if (value is not string confirmPassword)
+			if (!(value is string text))
 				return false;
 
 			if (TargetEntry is MEntry mEntry)
-			{
-				return confirmPassword == mEntry.Text;  // For MEntry
-			}
-			else if (TargetEntry is Entry entry)
-			{
-				return confirmPassword == entry.Text;  // For normal Entry
-			}
+				return text == mEntry.Text;
+			if (TargetEntry is Entry entry)
+				return text == entry.Text;
+
 			return false;
 		}
 	}
